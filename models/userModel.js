@@ -17,10 +17,6 @@ const userSchema = new mongoose.Schema({
   resetToken: {
     type: String,
   },
-  verified: {
-    type: Boolean,
-    default: false,
-  },
   height: {
     type: Number,
     required: true,

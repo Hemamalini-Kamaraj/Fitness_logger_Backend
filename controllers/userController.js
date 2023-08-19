@@ -42,7 +42,7 @@ const userController = {
     };
 
     // generate a token for the user and return it
-    const token = jwt.sign(payloadData, SECRET_KEY, { expiresIn: "3h" });
+    const token = jwt.sign(payloadData, SECRET_KEY, { expiresIn: "1h" });
 
     res.status(200).send({ token: token, name: user.name, email: user.email });
   },
@@ -75,7 +75,7 @@ const userController = {
         password: hasedPassword,
         resetToken: randomString,
         height,
-        weight
+        weight,
       });
 
       await newUser.save();
@@ -107,30 +107,6 @@ const userController = {
       });
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });
-    }
-  },
-
-  accountActivation: async (req, res) => {
-    try {
-      const resetToken = req.params.id;
-
-      const matchedUser = await userModel.findOne({ resetToken });
-
-      if (matchedUser === null) {
-        return res
-          .status(400)
-          .json({ message: "Account activation link expired" });
-      }
-
-      matchedUser.verified = true;
-      matchedUser.resetToken = "";
-
-      await userModel.findByIdAndUpdate(matchedUser.id, matchedUser);
-      res.status(201).json({
-        message: "account verified sucessfully.. kindly visit the login page",
-      });
-    } catch (error) {
-      return res.status(400).json({ Err: "Account activation link expired" });
     }
   },
 

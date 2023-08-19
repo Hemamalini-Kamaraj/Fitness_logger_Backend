@@ -13,7 +13,6 @@ router.post("/signup", userController.signup);
 router.put("/forgot-password", userController.forgotPassword);
 router.patch("/reset-password/:id", userController.resetPassword);
 router.post("/signin", userController.signin);
-router.patch("/acc-verification/:id", userController.accountActivation);
 
 router.get("/profile", authMiddleware.verifyToken, userController.getUserProfile);
 router.put("/profile", authMiddleware.verifyToken,userController.updateUserProfile)
