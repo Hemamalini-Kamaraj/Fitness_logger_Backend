@@ -21,13 +21,6 @@ const userController = {
       return res.status(401).json({ message: "user does not exists" });
     }
 
-    // return error if the user doen not verified their account
-    if (!user.verified) {
-      return res
-        .status(401)
-        .json({ message: "User does not verified the account" });
-    }
-
     // check if the password is correct
     const isAuthenticated = await bcrypt.compare(password, user.password);
 
