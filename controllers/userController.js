@@ -11,33 +11,39 @@ const {
 const userController = {
   signin: async (req, res) => {
     // getting email and password from the user
-    const { email, password } = req.body;
+    try {
+      const { email, password } = req.body;
 
-    //checking whether user exists or not
-    const user = await userModel.findOne({ email });
+      //checking whether user exists or not
+      const user = await userModel.findOne({ email });
 
-    // return error if the user does not exist
-    if (!user) {
-      return res.status(401).json({ message: "user does not exists" });
+      // return error if the user does not exist
+      if (!user) {
+        return res.status(401).json({ message: "user does not exists" });
+      }
+
+      // check if the password is correct
+      const isAuthenticated = await bcrypt.compare(password, user.password);
+
+      // // return error if the password is not correct
+      if (!isAuthenticated) {
+        return res.status(401).json({ message: "password does not match" });
+      }
+
+      const payloadData = {
+        name: user.name,
+        id: user._id,
+      };
+
+      // generate a token for the user and return it
+      const token = jwt.sign(payloadData, SECRET_KEY, { expiresIn: "1h" });
+
+      res
+        .status(200)
+        .send({ token: token, name: user.name, email: user.email });
+    } catch (error) {
+      res.status(500).json({ message: error });
     }
-
-    // check if the password is correct
-    const isAuthenticated = await bcrypt.compare(password, user.password);
-
-    // return error if the password is not correct
-    if (!isAuthenticated) {
-      return res.status(401).json({ message: "password does not match" });
-    }
-
-    const payloadData = {
-      name: user.name,
-      id: user._id,
-    };
-
-    // generate a token for the user and return it
-    const token = jwt.sign(payloadData, SECRET_KEY, { expiresIn: "1h" });
-
-    res.status(200).send({ token: token, name: user.name, email: user.email });
   },
 
   signup: async (req, res) => {
@@ -53,12 +59,6 @@ const userController = {
         return res.status(409).json({ message: "User already exits" });
       }
 
-      const randomString =
-        Math.random().toString(36).substring(2, 15) +
-        Math.random().toString(36).substring(2, 15);
-
-      const accVerificationLink = `https://coruscating-gingersnap-023f63.netlify.app/user/acc-verification/${randomString}`;
-
       // check if the password is correct
       const hasedPassword = await bcrypt.hash(password, 10);
 
@@ -66,40 +66,17 @@ const userController = {
         name,
         email,
         password: hasedPassword,
-        resetToken: randomString,
         height,
         weight,
       });
 
       await newUser.save();
 
-      //   email authentication
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: EMAIL_ADDRESS,
-          pass: EMAIL_PASSWORD,
-        },
-      });
-
-      //   sendind email to rest the password
-      const sendMail = async () => {
-        const info = await transporter.sendMail({
-          from: `"Hemamalini Kamaraj" <${EMAIL_ADDRESS}>`,
-          to: email,
-          subject: "Account Verification",
-          text: `Kindly use this link to verify your account - ${accVerificationLink}`,
-        });
-      };
-
-      sendMail();
-
       res.status(201).json({
-        message:
-          "User created successfully.Kindly activate your account. Please verify your email!",
+        message: "User created successfully.Kindly login!",
       });
     } catch (error) {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: error });
     }
   },
 
@@ -129,7 +106,7 @@ const userController = {
       const link = `https://coruscating-gingersnap-023f63.netlify.app/reset-password/${randomString}`;
 
       user.resetToken = randomString;
-      const updateUser = await userModel.findByIdAndUpdate(user.id, user);
+      const updateUser = await userModel.findByIdAndUpdate(user._id, user);
 
       //   email authentication
       const transporter = nodemailer.createTransport({
@@ -185,7 +162,7 @@ const userController = {
       //   resetting the token
       user.resetToken = "";
 
-      await userModel.findByIdAndUpdate(user.id, user);
+      await userModel.findByIdAndUpdate(user._id, user);
 
       res.status(201).json({
         message: "Password has been changed sucessfully",
@@ -201,7 +178,6 @@ const userController = {
       const user = await userModel.findById(userId, "name email height weight");
       res.status(200).json(user);
     } catch (error) {
-      console.error("Error getting user profile", error);
       res.status(500).json({ message: error });
     }
   },
