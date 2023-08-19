@@ -31,16 +31,19 @@ const userWorkoutController = {
   postUserWorkout: async (req, res) => {
     try {
       const userId = req.userId;
-      const { day, exercises } = req.body;
+        const { day, exercises } = req.body;
+        
+      const totalTime = [];
 
-      //   const existingDay = await userWorkoutModel.find({
-      //     userId: userId,
-      //     day: day,
-      //   });
+      exercises.map((exe) => totalTime.push(exe.duration));
+      const totalDuration = totalTime.reduce(
+        (accum, current) => Number(accum) + Number(current)
+      );
 
       const newUserWorkout = new userWorkoutModel({
         userId,
         day: new Date(day),
+        totalDuration,
         exercises,
       });
 
@@ -128,41 +131,24 @@ const userWorkoutController = {
       const userId = req.userId;
       const startDate = req.params.startDate;
       const endDate = req.params.endDate;
-      const userWorkout = await userWorkoutModel
-        // .find({
-        //   userId: userId,
-        //   day: { $gte: startDate, $lte: endDate },
-        // })
-        .aggregate([
-          {
-            $match: {
-              //   $and: [
-              //     {
-              //       $expr: {
-              //         $eq: ["$userId", { $toObjectId: req.userId }],
-              //       },
-              //     },
-              //     {
-              day: { $gte: startDate, $lte: endDate },
-              //     }
-              //   ],
-            },
-          },
-          console.log(startDate),
-          //   {
-          //     $match: {
-          //       day: { $gte: startDate},
-          //     },
-          //   },
-          //   {
-          //     $addFields: {
-          //       totalDuration: {
-          //         $sum: "$exercises.duration",
-          //       },
-          //     },
-          //   },
-        ])
-        .sort({ day: "ascending" });
+      const userWorkout = await userWorkoutModel.find({
+        userId: userId,
+        day: { $gte: startDate, $lte: endDate },
+      }).sort({day:"ascending"});
+
+      // const totalTime = [];
+
+      // userWorkout.map(user => user.exercises.map(dur=> totalTime.push(dur.duration)))
+      // const totalDuration = totalTime.reduce((accum, current) => accum + current)
+      // console.log(totalDuration)
+      // .aggregate([
+      //   {
+      //     $match: {
+      //       day: { $gte: startDate, $lte: endDate },
+      //     },
+      //   },
+      // ]);
+      // .sort({ day: "ascending" });
       res.json(userWorkout);
     } catch (error) {
       res.status(500).json({ message: error });

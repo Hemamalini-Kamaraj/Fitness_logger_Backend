@@ -9,6 +9,9 @@ const userWorkoutSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  totalDuration: {
+    type: Number,
+  },
   exercises: [
     {
       exercise: String,

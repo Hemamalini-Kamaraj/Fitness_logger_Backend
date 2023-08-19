@@ -64,7 +64,7 @@ const userController = {
         Math.random().toString(36).substring(2, 15) +
         Math.random().toString(36).substring(2, 15);
 
-      const accVerificationLink = `https://merry-pixie-65f0af.netlify.app/user/acc-verification/${randomString}`;
+      const accVerificationLink = `https://coruscating-gingersnap-023f63.netlify.app/user/acc-verification/${randomString}`;
 
       // check if the password is correct
       const hasedPassword = await bcrypt.hash(password, 10);
@@ -155,7 +155,7 @@ const userController = {
         Math.random().toString(36).substring(2, 15) +
         Math.random().toString(36).substring(2, 15);
 
-      const link = `https://merry-pixie-65f0af.netlify.app/user /reset-password/${randomString}`;
+      const link = `https://coruscating-gingersnap-023f63.netlify.app/reset-password/${randomString}`;
 
       user.resetToken = randomString;
       const updateUser = await userModel.findByIdAndUpdate(user.id, user);
