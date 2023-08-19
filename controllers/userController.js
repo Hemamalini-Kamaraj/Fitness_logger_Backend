@@ -50,7 +50,7 @@ const userController = {
   signup: async (req, res) => {
     try {
       // getting signup details from the user
-      const { name, email, password } = req.body;
+      const { name, email, password, height, weight } = req.body;
 
       // check whether user already exists
       const existingUser = await userModel.findOne({ email });
