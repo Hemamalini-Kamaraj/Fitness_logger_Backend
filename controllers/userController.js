@@ -74,6 +74,8 @@ const userController = {
         email,
         password: hasedPassword,
         resetToken: randomString,
+        height,
+        weight
       });
 
       await newUser.save();
@@ -146,9 +148,9 @@ const userController = {
       const user = await userModel.findOne({ email });
 
       //   return error if the user does not exist
-      if (!user) {
-        return res.status(400).json({ message: "User not found" });
-      }
+      // if (!user) {
+      //   return res.status(400).json({ message: "User not found" });
+      // }
 
       // cgenerating random string to create the token
       const randomString =
